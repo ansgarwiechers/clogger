@@ -1,6 +1,6 @@
 What is this?
 =============
-The Logger class serves as an abstraction layer for logging in VBScripts. That
+The CLogger class serves as an abstraction layer for logging in VBScripts. That
 way a script can define the logging facilities once and then use the same set
 of functions for writing log messages to all selected facilities. Supported
 facilities are:
@@ -22,8 +22,9 @@ by the parent script.
 
 Copyright
 =========
-It is distributed according to the terms of the GNU General Public License
-Version 2.0 as found at <http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>.
+This script is distributed according to the terms of the GNU General Public
+License Version 2.0 as found at
+<http://www.gnu.org/licenses/old-licenses/gpl-2.0.html>.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
@@ -52,8 +53,8 @@ End Sub
 
 Example
 =======
-' creating a new Logger instance
-Set myLogger = New Logger
+' creating a new CLogger instance
+Set myLogger = New CLogger
 
 ' configuring the logger
 myLogger.Debug = True               ' enable debug logging
@@ -78,4 +79,3 @@ Thanks to
 =========
 Alexander Bernauer <http://blog.copton.net/>
 Rico Schiekel <http://downgra.de/>
-
