@@ -12,13 +12,13 @@
 ' along with this program; if not, write to the Free Software
 ' Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-Const INTERNAL_ERROR   = 51 '! Error number for internal errors.
-                            '! @see http://msdn.microsoft.com/en-us/library/xe43cc8d
-Const INVALID_ARGUMENT = 5  '! Error number for an invalid argument being passed to a procedure.
-                            '! @see http://msdn.microsoft.com/en-us/library/xe43cc8d
+Private Const INTERNAL_ERROR   = 51 '! Error number for internal errors.
+                                    '! @see http://msdn.microsoft.com/en-us/library/xe43cc8d
+Private Const INVALID_ARGUMENT = 5  '! Error number for an invalid argument being passed to a procedure.
+                                    '! @see http://msdn.microsoft.com/en-us/library/xe43cc8d
 
 '! Symbolic constant for debugging mode. For internal use only.
-Private Const vbDebug = &h0050
+Private Const vbsDebug = &h0050
 
 '! Create an error message with hexadecimal error number from the given Err
 '! object's properties. Formatted messages will look like "Foo bar (0xDEAD)".
@@ -47,14 +47,14 @@ End Function
 '! @return Formatted error message consisting of error description and
 '!         decimal error number. Empty string if neither error description
 '!         nor error number are available.
-Public Function FormatErrorMessageD(e)
+Public Function FormatErrorMessageDec(e)
   Dim re : Set re = New RegExp
   re.Global = True
   re.Pattern = "\s+"
   FormatErrorMessage = Trim(Trim(re.Replace(e.Description, " ")) & " (" & e.Number & ")")
 End Function
 
-'! Class for abstract logging to one or more logging facility. Valid
+'! Class for abstract logging to one or more logging facilities. Valid
 '! facilities are:
 '!
 '! - interactive desktop/console
@@ -65,9 +65,9 @@ End Function
 '! errors is entirely up to the calling script.
 '!
 '! @author  Ansgar Wiechers <ansgar.wiechers@planetcobalt.net>
-'! @date    2011-01-02
-'! @version 1.3
-Class Logger
+'! @date    2011-03-13
+'! @version 2.0
+Class CLogger
 	Private validLogLevels
 	Private logToConsoleEnabled
 	Private logToFileEnabled
@@ -92,7 +92,7 @@ Class Logger
 	End Property
 
 	Public Property Let LogToConsole(ByVal enable)
-		logToConsoleEnabled = Not Not enable
+		logToConsoleEnabled = CBool(enable)
 	End Property
 
 	'! Indicates whether logging to a file is enabled or disabled. The log file
@@ -167,7 +167,7 @@ Class Logger
 	End Property
 
 	Public Property Let Overwrite(ByVal enable)
-		overwriteFile = Not Not enable
+		overwriteFile = CBool(enable)
 	End Property
 
 	'! Separate the fields of log file entries with the given character. The
@@ -203,7 +203,7 @@ Class Logger
 	End Property
 
 	Public Property Let LogToEventlog(ByVal enable)
-		logToEventlogEnabled = Not Not enable
+		logToEventlogEnabled = CBool(enable)
 		If sh Is Nothing And logToEventlogEnabled Then
 			Set sh = CreateObject("WScript.Shell")
 		ElseIf Not (sh Is Nothing Or logToEventlogEnabled) Then
@@ -220,7 +220,7 @@ Class Logger
 	End Property
 
 	Public Property Let IncludeTimestamp(ByVal enable)
-		addTimestamp = Not Not enable
+		addTimestamp = CBool(enable)
 	End Property
 
 	'! Enable or disable debug logging. If enabled, debug messages (i.e.
@@ -232,7 +232,7 @@ Class Logger
 	End Property
 
 	Public Property Let Debug(ByVal enable)
-		debugEnabled = Not Not enable
+		debugEnabled = CBool(enable)
 	End Property
 
 	' - Constructor/Destructor ---------------------------------------------------
@@ -261,7 +261,7 @@ Class Logger
 		validLogLevels.Add vbInformation, True
 		validLogLevels.Add vbExclamation, True
 		validLogLevels.Add vbCritical, True
-		validLogLevels.Add vbDebug, True
+		validLogLevels.Add vbsDebug, True
 	End Sub
 
 	'! @brief Destructor.
@@ -316,7 +316,7 @@ Class Logger
 	'!
 	'! @see #Debug
 	Public Sub LogDebug(msg)
-		If debugEnabled Then LogMessage msg, vbDebug
+		If debugEnabled Then LogMessage msg, vbsDebug
 	End Sub
 
 	'! Log the given message with the given log level to all enabled facilities.
@@ -344,11 +344,11 @@ Class Logger
 					Case vbInformation: WScript.StdOut.WriteLine prefix & msg
 					Case vbExclamation: WScript.StdErr.WriteLine prefix & "Warning: " & msg
 					Case vbCritical:    WScript.StdErr.WriteLine prefix & "Error: " & msg
-					Case vbDebug:       WScript.StdOut.WriteLine prefix & "DEBUG: " & msg
+					Case vbsDebug:      WScript.StdOut.WriteLine prefix & "DEBUG: " & msg
 				End Select
 			Else
 				If addTimestamp Then prefix = tstamp & vbNewLine & vbNewLine
-				If logLevel = vbDebug Then
+				If logLevel = vbsDebug Then
 					MsgBox prefix & msg, vbOKOnly Or vbInformation, WScript.ScriptName & " (Debug)"
 				Else
 					MsgBox prefix & msg, vbOKOnly Or logLevel, WScript.ScriptName
@@ -363,7 +363,7 @@ Class Logger
 				Case vbInformation: logFileHandle.WriteLine prefix & "INFO" & sep & msg
 				Case vbExclamation: logFileHandle.WriteLine prefix & "WARN" & sep & msg
 				Case vbCritical:    logFileHandle.WriteLine prefix & "ERROR" & sep & msg
-				Case vbDebug:       logFileHandle.WriteLine prefix & "DEBUG" & sep & msg
+				Case vbsDebug:      logFileHandle.WriteLine prefix & "DEBUG" & sep & msg
 			End Select
 		End If
 
@@ -375,7 +375,7 @@ Class Logger
 				Case vbInformation: sh.LogEvent 4, msg
 				Case vbExclamation: sh.LogEvent 2, msg
 				Case vbCritical:    sh.LogEvent 1, msg
-				Case vbDebug:       sh.LogEvent 0, "DEBUG: " & msg
+				Case vbsDebug:      sh.LogEvent 0, "DEBUG: " & msg
 			End Select
 		End If
 	End Sub
