@@ -12,14 +12,6 @@
 ' along with this program; if not, write to the Free Software
 ' Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-Private Const INTERNAL_ERROR   = 51 '! Error number for internal errors.
-                                    '! @see http://msdn.microsoft.com/en-us/library/xe43cc8d
-Private Const INVALID_ARGUMENT = 5  '! Error number for an invalid argument being passed to a procedure.
-                                    '! @see http://msdn.microsoft.com/en-us/library/xe43cc8d
-
-'! Symbolic constant for debugging mode. For internal use only.
-Private Const vbsDebug = &h0050
-
 '! Create an error message with hexadecimal error number from the given Err
 '! object's properties. Formatted messages will look like "Foo bar (0xDEAD)".
 '!
@@ -79,6 +71,7 @@ Class CLogger
 	Private sh
 	Private addTimestamp
 	Private debugEnabled
+	Private vbsDebug
 
 	'! Enable or disable logging to desktop/console. Depending on whether the
 	'! script is run via wscript.exe or cscript.exe, the message is either
@@ -175,13 +168,14 @@ Class CLogger
 	'! file and is ignored by all other facilities.
 	'!
 	'! @raise  Separator must be a single character (5)
+	'! @see http://msdn.microsoft.com/en-us/library/xe43cc8d (VBScript Run-time Errors)
 	Public Property Get Separator
 		Separator = sep
 	End Property
 
 	Public Property Let Separator(ByVal char)
 		If Len(char) <> 1 Then
-			Err.Raise INVALID_ARGUMENT, WScript.ScriptName, "Separator must be a single character."
+			Err.Raise 5, WScript.ScriptName, "Separator must be a single character."
 		Else
 			sep = char
 		End If
@@ -252,10 +246,12 @@ Class CLogger
 		sep = vbTab
 
 		logToEventlogEnabled = Not WScript.Interactive
+
 		Set sh = Nothing
 
 		addTimestamp = False
 		debugEnabled = False
+		vbsDebug = &h0050
 
 		Set validLogLevels = CreateObject("Scripting.Dictionary")
 		validLogLevels.Add vbInformation, True
@@ -325,10 +321,11 @@ Class CLogger
 	'! @param  logLevel  Logging level (Information, Warning, Error, Debug) of the message.
 	'!
 	'! @raise  Undefined log level (51)
+	'! @see http://msdn.microsoft.com/en-us/library/xe43cc8d (VBScript Run-time Errors)
 	Private Sub LogMessage(msg, logLevel)
 		Dim tstamp, prefix
 
-		If Not validLogLevels.Exists(logLevel) Then Err.Raise INTERNAL_ERROR, _
+		If Not validLogLevels.Exists(logLevel) Then Err.Raise 51, _
 			WScript.ScriptName, "Undefined log level '" & logLevel & "'."
 
 		tstamp = Now
