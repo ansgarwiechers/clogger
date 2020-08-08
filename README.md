@@ -77,7 +77,7 @@ Example
 
 Thanks to
 =========
-Alexander Bernauer
-Rico Schiekel
+Alexander Bernauer  
+Rico Schiekel  
 
 [1]: http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
